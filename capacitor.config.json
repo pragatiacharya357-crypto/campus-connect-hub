@@ -1,0 +1,9 @@
+{
+  "appId": "app.lovable.75df64349daf4c79a677b436db47a587",
+  "appName": "UniBuzz",
+  "webDir": "dist",
+  "server": {
+    "url": "https://75df6434-9daf-4c79-a677-b436db47a587.lovableproject.com?forceHideBadge=true",
+    "cleartext": true
+  }
+}
