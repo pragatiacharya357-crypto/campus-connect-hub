@@ -1,6 +1,6 @@
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import { motion } from "framer-motion";
-import { ThumbsUp, ThumbsDown, MessageCircle, Clock, UserCircle2 } from "lucide-react";
+import { ThumbsUp, ThumbsDown, MessageCircle, Clock, UserCircle2, Share2, Bookmark } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
 import { supabase } from "@/integrations/supabase/client";
@@ -44,24 +44,19 @@ const PostCard: React.FC<PostCardProps> = ({
   const [voteCount, setVoteCount] = useState(initialVoteCount);
   const [userVote, setUserVote] = useState(initialUserVote);
   const [voting, setVoting] = useState(false);
+  const [saved, setSaved] = useState(false);
 
   const handleVote = async (voteType: number) => {
-    if (!user) {
-      toast.error("Sign in to vote");
-      return;
-    }
+    if (!user) { toast.error("Sign in to vote"); return; }
     if (voting) return;
     setVoting(true);
-
     try {
       if (userVote === voteType) {
-        // Remove vote
         await supabase.from("votes").delete().eq("post_id", id).eq("user_id", user.id);
         setVoteCount((v) => v - voteType);
         setUserVote(null);
       } else {
         if (userVote !== null) {
-          // Change vote
           await supabase.from("votes").delete().eq("post_id", id).eq("user_id", user.id);
           setVoteCount((v) => v - userVote);
         }
@@ -76,24 +71,51 @@ const PostCard: React.FC<PostCardProps> = ({
     }
   };
 
+  const handleShare = async () => {
+    try {
+      await navigator.share?.({ title: "UniBuzz Post", text: content.slice(0, 100), url: `${window.location.origin}/post/${id}` });
+    } catch {
+      await navigator.clipboard.writeText(`${window.location.origin}/post/${id}`);
+      toast.success("Link copied!");
+    }
+  };
+
   return (
-    <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }}>
-      <Card className="border border-border/50 shadow-sm hover:shadow-md transition-shadow">
+    <motion.div
+      initial={{ opacity: 0, y: 10 }}
+      animate={{ opacity: 1, y: 0 }}
+      whileHover={{ scale: 1.01 }}
+      transition={{ type: "spring", stiffness: 400, damping: 25 }}
+    >
+      <Card className="border border-border/50 shadow-sm hover:shadow-lg transition-all duration-300 overflow-hidden">
+        {/* Hot post indicator */}
+        {voteCount >= 5 && (
+          <div className="h-1 w-full gradient-primary" />
+        )}
         <CardContent className="p-4">
           {/* Author + time */}
           <div className="flex items-center gap-2 mb-2">
-            <UserCircle2 className="h-5 w-5 text-muted-foreground" />
-            <span className="text-sm font-medium">
-              {isAnonymous ? "Anonymous Student" : authorName}
-            </span>
-            <span className="text-xs text-muted-foreground ml-auto flex items-center gap-1">
-              <Clock className="h-3 w-3" />
-              {formatDistanceToNow(new Date(createdAt), { addSuffix: true })}
-            </span>
+            <div className="w-8 h-8 rounded-full gradient-primary flex items-center justify-center text-primary-foreground text-xs font-bold">
+              {isAnonymous ? "?" : authorName.charAt(0).toUpperCase()}
+            </div>
+            <div>
+              <span className="text-sm font-medium">
+                {isAnonymous ? "Anonymous Student" : authorName}
+              </span>
+              <span className="block text-xs text-muted-foreground flex items-center gap-1">
+                <Clock className="h-3 w-3" />
+                {formatDistanceToNow(new Date(createdAt), { addSuffix: true })}
+              </span>
+            </div>
+            {voteCount >= 5 && (
+              <Badge className="ml-auto gradient-accent text-accent-foreground text-[10px]">🔥 Hot</Badge>
+            )}
           </div>
 
           {/* Content */}
-          <p className="text-sm leading-relaxed mb-3">{content}</p>
+          <p className="text-sm leading-relaxed mb-3 cursor-pointer" onClick={() => navigate(`/post/${id}`)}>
+            {content}
+          </p>
 
           {/* Hashtags */}
           {hashtags.length > 0 && (
@@ -111,11 +133,13 @@ const PostCard: React.FC<PostCardProps> = ({
           )}
 
           {/* Actions */}
-          <div className="flex items-center gap-4 pt-2 border-t border-border/50">
+          <div className="flex items-center gap-1 pt-2 border-t border-border/50">
             <button
               onClick={() => handleVote(1)}
-              className={`flex items-center gap-1 text-sm transition-colors ${
-                userVote === 1 ? "text-primary font-semibold" : "text-muted-foreground hover:text-primary"
+              className={`flex items-center gap-1 px-2 py-1 rounded-md text-sm transition-all ${
+                userVote === 1
+                  ? "text-primary bg-primary/10 font-semibold"
+                  : "text-muted-foreground hover:text-primary hover:bg-primary/5"
               }`}
             >
               <ThumbsUp className="h-4 w-4" />
@@ -127,19 +151,39 @@ const PostCard: React.FC<PostCardProps> = ({
             </span>
             <button
               onClick={() => handleVote(-1)}
-              className={`flex items-center gap-1 text-sm transition-colors ${
-                userVote === -1 ? "text-destructive font-semibold" : "text-muted-foreground hover:text-destructive"
+              className={`flex items-center gap-1 px-2 py-1 rounded-md text-sm transition-all ${
+                userVote === -1
+                  ? "text-destructive bg-destructive/10 font-semibold"
+                  : "text-muted-foreground hover:text-destructive hover:bg-destructive/5"
               }`}
             >
               <ThumbsDown className="h-4 w-4" />
             </button>
+
             <button
               onClick={() => navigate(`/post/${id}`)}
-              className="flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground transition-colors ml-auto"
+              className="flex items-center gap-1 px-2 py-1 rounded-md text-sm text-muted-foreground hover:text-foreground hover:bg-muted/50 transition-all ml-2"
             >
               <MessageCircle className="h-4 w-4" />
               <span>{commentCount}</span>
             </button>
+
+            <div className="ml-auto flex items-center gap-1">
+              <button
+                onClick={handleShare}
+                className="p-1.5 rounded-md text-muted-foreground hover:text-foreground hover:bg-muted/50 transition-all"
+              >
+                <Share2 className="h-4 w-4" />
+              </button>
+              <button
+                onClick={() => { setSaved(!saved); toast.success(saved ? "Removed from saved" : "Saved!"); }}
+                className={`p-1.5 rounded-md transition-all ${
+                  saved ? "text-primary bg-primary/10" : "text-muted-foreground hover:text-foreground hover:bg-muted/50"
+                }`}
+              >
+                <Bookmark className={`h-4 w-4 ${saved ? "fill-current" : ""}`} />
+              </button>
+            </div>
           </div>
         </CardContent>
       </Card>
