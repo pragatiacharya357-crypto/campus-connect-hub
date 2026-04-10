@@ -49,6 +49,7 @@
     --gradient-secondary: linear-gradient(135deg, hsl(345, 40%, 20%), hsl(0, 0%, 10%));
     --gradient-accent: linear-gradient(135deg, hsl(345, 70%, 45%), hsl(330, 60%, 40%));
     --gradient-hero: linear-gradient(135deg, hsl(345, 60%, 35%) 0%, hsl(355, 50%, 25%) 50%, hsl(0, 0%, 8%) 100%);
+    --gradient-glow: linear-gradient(135deg, hsl(345, 80%, 50%), hsl(20, 90%, 55%));
   }
 
   .dark {
@@ -98,6 +99,8 @@
   body {
     @apply bg-background text-foreground font-sans;
     font-family: 'Inter', sans-serif;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
   }
   h1, h2, h3, h4, h5, h6 {
     font-family: 'Space Grotesk', sans-serif;
@@ -117,10 +120,52 @@
   .gradient-hero {
     background: var(--gradient-hero);
   }
+  .gradient-glow {
+    background: var(--gradient-glow);
+  }
   .text-gradient {
     background: var(--gradient-hero);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
+  }
+  .text-gradient-glow {
+    background: var(--gradient-glow);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+  .glass {
+    background: hsl(var(--card) / 0.7);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+  }
+  .glass-dark {
+    background: hsl(var(--background) / 0.8);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+  }
+  .safe-area-bottom {
+    padding-bottom: env(safe-area-inset-bottom, 0px);
+  }
+  .safe-area-top {
+    padding-top: env(safe-area-inset-top, 0px);
+  }
+
+  /* Scrollbar styling */
+  ::-webkit-scrollbar {
+    width: 4px;
+  }
+  ::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  ::-webkit-scrollbar-thumb {
+    background: hsl(var(--muted-foreground) / 0.3);
+    border-radius: 99px;
+  }
+
+  /* Haptic-feel tap highlight */
+  * {
+    -webkit-tap-highlight-color: hsl(var(--primary) / 0.1);
   }
 }

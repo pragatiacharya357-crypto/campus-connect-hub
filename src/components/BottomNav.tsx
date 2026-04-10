@@ -1,6 +1,7 @@
 import { Home, Grid3X3, PlusCircle, Megaphone, User } from "lucide-react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { cn } from "@/lib/utils";
+import { motion } from "framer-motion";
 
 const tabs = [
   { path: "/", icon: Home, label: "Home" },
@@ -15,7 +16,7 @@ const BottomNav = () => {
   const navigate = useNavigate();
 
   return (
-    <nav className="fixed bottom-0 left-0 right-0 z-50 bg-card/95 backdrop-blur-lg border-t border-border safe-area-bottom">
+    <nav className="fixed bottom-0 left-0 right-0 z-50 glass border-t border-border/50 safe-area-bottom">
       <div className="flex items-center justify-around h-16 max-w-lg mx-auto">
         {tabs.map((tab) => {
           const isActive = location.pathname === tab.path;
@@ -26,19 +27,31 @@ const BottomNav = () => {
               key={tab.path}
               onClick={() => navigate(tab.path)}
               className={cn(
-                "flex flex-col items-center justify-center gap-0.5 w-16 h-full transition-all",
+                "relative flex flex-col items-center justify-center gap-0.5 w-16 h-full transition-all",
                 isActive ? "text-primary" : "text-muted-foreground",
                 isCreate && "relative"
               )}
             >
               {isCreate ? (
-                <div className="w-12 h-12 rounded-full gradient-primary flex items-center justify-center -mt-4 shadow-lg">
+                <motion.div
+                  whileTap={{ scale: 0.9 }}
+                  className="w-12 h-12 rounded-full gradient-glow flex items-center justify-center -mt-5 shadow-lg shadow-primary/30"
+                >
                   <PlusCircle className="h-6 w-6 text-primary-foreground" />
-                </div>
+                </motion.div>
               ) : (
                 <>
-                  <tab.icon className={cn("h-5 w-5", isActive && "scale-110")} />
-                  <span className="text-[10px] font-medium">{tab.label}</span>
+                  {isActive && (
+                    <motion.div
+                      layoutId="nav-indicator"
+                      className="absolute top-0 w-8 h-0.5 rounded-full gradient-primary"
+                      transition={{ type: "spring", stiffness: 500, damping: 30 }}
+                    />
+                  )}
+                  <motion.div whileTap={{ scale: 0.85 }}>
+                    <tab.icon className={cn("h-5 w-5 transition-all", isActive && "scale-110")} />
+                  </motion.div>
+                  <span className={cn("text-[10px] font-medium transition-all", isActive && "font-bold")}>{tab.label}</span>
                 </>
               )}
             </button>
