@@ -224,9 +224,55 @@ export type Database = {
       }
     }
     Views: {
-      [_ in never]: never
+      profiles_public: {
+        Row: {
+          anonymous_default: boolean | null
+          avatar_url: string | null
+          created_at: string | null
+          display_name: string | null
+          id: string | null
+          updated_at: string | null
+          username: string | null
+          verified: boolean | null
+        }
+        Insert: {
+          anonymous_default?: boolean | null
+          avatar_url?: string | null
+          created_at?: string | null
+          display_name?: string | null
+          id?: string | null
+          updated_at?: string | null
+          username?: string | null
+          verified?: boolean | null
+        }
+        Update: {
+          anonymous_default?: boolean | null
+          avatar_url?: string | null
+          created_at?: string | null
+          display_name?: string | null
+          id?: string | null
+          updated_at?: string | null
+          username?: string | null
+          verified?: boolean | null
+        }
+        Relationships: []
+      }
     }
     Functions: {
+      get_post_vote_counts: {
+        Args: { post_ids: string[] }
+        Returns: {
+          post_id: string
+          vote_count: number
+        }[]
+      }
+      get_trending_post_ids: {
+        Args: { limit_count?: number }
+        Returns: {
+          post_id: string
+          vote_count: number
+        }[]
+      }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]

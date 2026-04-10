@@ -29,28 +29,39 @@ const Index = () => {
   return (
     <div className="min-h-screen pb-20">
       {/* Header */}
-      <header className="sticky top-0 z-40 gradient-primary px-4 py-4 pb-3">
+      <header className="sticky top-0 z-40 gradient-primary px-4 pt-4 pb-3 safe-area-top">
         <div className="max-w-lg mx-auto">
           <div className="flex items-center justify-between mb-3">
-            <div>
+            <motion.div
+              initial={{ opacity: 0, x: -10 }}
+              animate={{ opacity: 1, x: 0 }}
+            >
               <h1 className="text-2xl font-bold font-display text-primary-foreground flex items-center gap-2">
-                <Zap className="h-6 w-6" /> UniBuzz
+                <motion.div
+                  animate={{ rotate: [0, 15, -15, 0] }}
+                  transition={{ repeat: Infinity, duration: 3, ease: "easeInOut" }}
+                >
+                  <Zap className="h-6 w-6" />
+                </motion.div>
+                UniBuzz
               </h1>
-              <p className="text-primary-foreground/70 text-xs">What's buzzing on campus?</p>
-            </div>
-            <div className="flex items-center gap-2">
-              <button
+              <p className="text-primary-foreground/60 text-xs tracking-wide">What's buzzing on campus?</p>
+            </motion.div>
+            <div className="flex items-center gap-1.5">
+              <motion.button
+                whileTap={{ scale: 0.85 }}
                 onClick={() => setShowSearch(!showSearch)}
-                className="p-2 rounded-full bg-primary-foreground/10 text-primary-foreground hover:bg-primary-foreground/20 transition-colors"
+                className="p-2.5 rounded-xl bg-primary-foreground/10 text-primary-foreground hover:bg-primary-foreground/20 transition-colors"
               >
                 <Search className="h-5 w-5" />
-              </button>
-              <button
+              </motion.button>
+              <motion.button
+                whileTap={{ scale: 0.85 }}
                 onClick={() => refetch()}
-                className="p-2 rounded-full bg-primary-foreground/10 text-primary-foreground hover:bg-primary-foreground/20 transition-colors"
+                className="p-2.5 rounded-xl bg-primary-foreground/10 text-primary-foreground hover:bg-primary-foreground/20 transition-colors"
               >
-                <RefreshCw className={`h-5 w-5 ${isRefetching ? "animate-spin" : ""}`} />
-              </button>
+                <RefreshCw className={`h-5 w-5 transition-transform ${isRefetching ? "animate-spin" : ""}`} />
+              </motion.button>
             </div>
           </div>
 
@@ -69,7 +80,7 @@ const Index = () => {
                     placeholder="Search posts..."
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
-                    className="pl-9 pr-8 bg-primary-foreground/90 border-0 text-foreground placeholder:text-muted-foreground"
+                    className="pl-9 pr-8 bg-primary-foreground/90 border-0 text-foreground placeholder:text-muted-foreground rounded-xl"
                     autoFocus
                   />
                   {searchQuery && (
@@ -85,26 +96,23 @@ const Index = () => {
           {/* Feed tabs */}
           {!isSearching && (
             <div className="flex gap-2">
-              <button
-                onClick={() => setActiveTab("latest")}
-                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold transition-all ${
-                  activeTab === "latest"
-                    ? "bg-primary-foreground text-primary"
-                    : "bg-primary-foreground/15 text-primary-foreground/80 hover:bg-primary-foreground/25"
-                }`}
-              >
-                <Flame className="h-3.5 w-3.5" /> Latest
-              </button>
-              <button
-                onClick={() => setActiveTab("trending")}
-                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold transition-all ${
-                  activeTab === "trending"
-                    ? "bg-primary-foreground text-primary"
-                    : "bg-primary-foreground/15 text-primary-foreground/80 hover:bg-primary-foreground/25"
-                }`}
-              >
-                <TrendingUp className="h-3.5 w-3.5" /> Trending
-              </button>
+              {[
+                { key: "latest" as FeedTab, icon: Flame, label: "Latest" },
+                { key: "trending" as FeedTab, icon: TrendingUp, label: "Trending" },
+              ].map((tab) => (
+                <motion.button
+                  key={tab.key}
+                  whileTap={{ scale: 0.93 }}
+                  onClick={() => setActiveTab(tab.key)}
+                  className={`relative flex items-center gap-1.5 px-4 py-1.5 rounded-full text-xs font-semibold transition-all ${
+                    activeTab === tab.key
+                      ? "bg-primary-foreground text-primary shadow-md"
+                      : "bg-primary-foreground/15 text-primary-foreground/80 hover:bg-primary-foreground/25"
+                  }`}
+                >
+                  <tab.icon className="h-3.5 w-3.5" /> {tab.label}
+                </motion.button>
+              ))}
             </div>
           )}
 
@@ -117,28 +125,36 @@ const Index = () => {
       </header>
 
       {/* Live indicator */}
-      <div className="max-w-lg mx-auto px-4 py-2 flex items-center gap-2">
+      <div className="max-w-lg mx-auto px-4 py-2.5 flex items-center gap-2">
         <span className="relative flex h-2 w-2">
           <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75" />
           <span className="relative inline-flex rounded-full h-2 w-2 bg-green-500" />
         </span>
-        <span className="text-xs text-muted-foreground">Live feed — updates in real-time</span>
+        <span className="text-[11px] text-muted-foreground font-medium">Live feed — updates in real-time</span>
       </div>
 
       {/* Feed */}
       <main className="max-w-lg mx-auto px-4 space-y-3">
         {loading ? (
           Array.from({ length: 4 }).map((_, i) => (
-            <Skeleton key={i} className="h-40 w-full rounded-lg" />
+            <motion.div
+              key={i}
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ delay: i * 0.1 }}
+            >
+              <Skeleton className="h-40 w-full rounded-xl" />
+            </motion.div>
           ))
         ) : displayPosts && displayPosts.length > 0 ? (
-          <AnimatePresence>
+          <AnimatePresence mode="popLayout">
             {displayPosts.map((post, i) => (
               <motion.div
                 key={post.id}
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: i * 0.03 }}
+                exit={{ opacity: 0, scale: 0.95 }}
+                transition={{ delay: i * 0.04, type: "spring", stiffness: 300, damping: 25 }}
               >
                 <PostCard
                   id={post.id}
@@ -155,8 +171,13 @@ const Index = () => {
             ))}
           </AnimatePresence>
         ) : (
-          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="text-center py-16">
-            <Zap className="h-16 w-16 text-primary/30 mx-auto mb-4" />
+          <motion.div initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} className="text-center py-20">
+            <motion.div
+              animate={{ y: [0, -8, 0] }}
+              transition={{ repeat: Infinity, duration: 2 }}
+            >
+              <Zap className="h-16 w-16 text-primary/20 mx-auto mb-4" />
+            </motion.div>
             <h2 className="text-lg font-display font-semibold text-muted-foreground">
               {isSearching ? "No results found" : "No buzz yet!"}
             </h2>
