@@ -259,6 +259,20 @@ export type Database = {
       }
     }
     Functions: {
+      get_post_vote_counts: {
+        Args: { post_ids: string[] }
+        Returns: {
+          post_id: string
+          vote_count: number
+        }[]
+      }
+      get_trending_post_ids: {
+        Args: { limit_count?: number }
+        Returns: {
+          post_id: string
+          vote_count: number
+        }[]
+      }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]
